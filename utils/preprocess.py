@@ -1,6 +1,6 @@
 import unicodedata,re
 import pandas as pd
-
+import numpy as np
 
 # Converts the unicode file to ascii
 def unicode_to_ascii(s):
