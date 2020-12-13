@@ -5,7 +5,7 @@ import torch.optim as optim
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 
- class Encoder(nn.Module):
+class Encoder(nn.Module):
     def __init__(self, vocab_size, embedding_dim, enc_units, batch_sz):
         super(Encoder, self).__init__()
         self.batch_sz = batch_sz
