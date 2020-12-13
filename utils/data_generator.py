@@ -49,6 +49,8 @@ class LanguageIndex():
         for word, index in self.word2idx.items():
             self.idx2word[index] = word   
 
+## Load Text file as pandas dataframe
+
 def load_raw_text_file(file_path,num_examples=None):
     """
     Input: Path for raw data
@@ -70,6 +72,7 @@ def load_raw_text_file(file_path,num_examples=None):
     df["es"] = df.es.apply(lambda w: preprocess_sentence(w))
     
     return df
+
 if __name__=='__main__':
     phrases = ['<start> i am a man <end>','<start> weather is great <end>']
     test_language_index=LanguageIndex(phrases)
