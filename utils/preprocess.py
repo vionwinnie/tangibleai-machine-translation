@@ -47,8 +47,8 @@ def sort_batch(X, y, lengths):
     return X.transpose(0,1), y, lengths # transpose (batch x seq) to (seq x batch)
 
 if __name__=='__main__':
-    file_path="/home/winnie/qary/machine-translation/machine-translation/data/spa.txt/spa.txt"
-    data=test(file_path,num_examples=300)
-    print(data)
     sentence = "I am a man?"
     print(preprocess_sentence(sentence))
+
+    phrase = [2,3,4,5]
+    print(pad_sequences(phrase,max_len=16))

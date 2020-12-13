@@ -4,7 +4,6 @@ import pandas as pd
 import tangiblemt.utils.preprocess as dp
 from tangiblemt.utils.data_generator import MyData, LanguageIndex
 
-
 def load_raw_text_file(file_path,num_examples=None):
     """
     Input: Path for raw data
@@ -26,7 +25,6 @@ def load_raw_text_file(file_path,num_examples=None):
     df["es"] = df.es.apply(lambda w: dp.preprocess_sentence(w))
 
     return df
-
 
 def convert_tensor(df, inp_index, targ_index):
 
