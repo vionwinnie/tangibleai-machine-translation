@@ -1,5 +1,4 @@
 import unicodedata,re
-import pandas as pd
 
 
 
