@@ -2,7 +2,8 @@ import unicodedata,re
 import pandas as pd
 
 ## Load text file as pandas dataframe
-def load_raw_text_file(file_path,num_examples=None):
+def test(file_path,num_examples=None):
+
     """
     Input: Path for raw data
     Output: Preprocessed Dataframe
@@ -70,7 +71,7 @@ def sort_batch(X, y, lengths):
 
 if __name__=='__main__':
     file_path="/home/winnie/qary/machine-translation/machine-translation/data/spa.txt/spa.txt"
-    df = load_raw_text_file(file_path,num_examples=300)
+    df = test(file_path,num_examples=300)
     print(df.shape)
     sentence = "I am a man?"
     print(preprocess_sentence(sentence))
