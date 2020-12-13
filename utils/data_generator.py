@@ -1,5 +1,6 @@
 from torch.utils.data import Dataset, DataLoader 
 import pandas as pd
+import numpy as np
 
 # conver the data to tensors and pass to the Dataloader 
 # to create an batch iterator
