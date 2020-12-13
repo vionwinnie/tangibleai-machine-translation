@@ -16,18 +16,22 @@ class Encoder(nn.Module):
         self.embedding = nn.Embedding(self.vocab_size, self.embedding_dim)
         self.device = torch.device("cuda" if self.gpu else "cpu")
         self.gru = nn.GRU(self.embedding_dim, self.enc_units)
+        self.debug = config.get('debug',False)
 
     def forward(self, x, lens):
         # x: batch_size, max_length 
+        if self.debug:
+            print("Input size: {}".format(x.shape)
         
         # x: batch_size, max_length, embedding_dim
         x = self.embedding(x) 
-        print(x.shape)
+        
+        if self.debug:
+            print("After embedding layer: {}".format(x.shape))
                 
         # x transformed = max_len X batch_size X embedding_dim
         # x = x.permute(1,0,2)
         x = pack_padded_sequence(x, lens)
-        print(x.shape)
     
         self.hidden = self.initialize_hidden_state(self.device)
         
@@ -35,15 +39,21 @@ class Encoder(nn.Module):
         # self.hidden: 1, batch_size, enc_units
         output, self.hidden = self.gru(x, self.hidden) 
         # gru returns hidden state of all timesteps as well as hidden state at last timestep
-        print('output : {}, hidden : {}'.format(output,hidden))
+        if self.debug:
+            print('output : {}, hidden : {}'.format(output,hidden))
 
         # unpad the sequence to the max length in the batch
         output, _ = pad_packed_sequence(output)
-        print('output after unpack : {}'.format(output.shape))
+        
+        if self.debug:
+            print('output after unpack : {}'.format(output.shape))
         
         return output, self.hidden
 
     def initialize_hidden_state(self):
-        return torch.zeros((1, self.batch_sz, self.enc_units)).to(self.device)
+        output = torch.zeros((1,self.batch_sz,self.enc_units)).to(self.device)
+        if self.debug:
+            print("initialized hidden state dim : {}".format(output.shape))
+        return output
 
 
