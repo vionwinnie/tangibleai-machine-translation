@@ -21,7 +21,7 @@ class Encoder(nn.Module):
     def forward(self, x, lens):
         # x: batch_size, max_length 
         if self.debug:
-            print("Input size: {}".format(x.shape)
+            print("Input size: {}".format(x.shape))
         
         # x: batch_size, max_length, embedding_dim
         x = self.embedding(x) 
