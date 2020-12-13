@@ -33,7 +33,7 @@ class Encoder(nn.Module):
         # x = x.permute(1,0,2)
         x = pack_padded_sequence(x, lens)
     
-        self.hidden = self.initialize_hidden_state(self.device)
+        self.hidden = self.initialize_hidden_state()
         
         # output: max_length, batch_size, enc_units
         # self.hidden: 1, batch_size, enc_units
