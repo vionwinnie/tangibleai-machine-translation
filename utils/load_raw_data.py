@@ -1,6 +1,9 @@
+"""This module loads data"""
+
 import pandas as pd
 import tangiblemt.utils.preprocess as dp
 from tangiblemt.utils.data_generator import MyData, LanguageIndex
+
 
 def load_raw_text_file(file_path,num_examples=None):
     """
@@ -25,10 +28,7 @@ def load_raw_text_file(file_path,num_examples=None):
     return df
 
 
-
-
-
-def convert_tensor(df,inp_index,targ_index):
+def convert_tensor(df, inp_index, targ_index):
 
     """
     Convert sentences into tensors
@@ -45,5 +45,4 @@ def convert_tensor(df,inp_index,targ_index):
     input_tensor = [dp.pad_sequences(x, max_length_inp) for x in input_tensor]
     target_tensor = [dp.pad_sequences(x, max_length_tar) for x in target_tensor]
 
-    return input_tensor,target_tensor
-
+    return input_tensor, target_tensor
