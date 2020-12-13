@@ -1,16 +1,6 @@
 import unicodedata,re
 import pandas as pd
 
-## Load text file as pandas dataframe
-def test(file_path,num_examples=None):
-
-    """
-    Input: Path for raw data
-    Output: Preprocessed Dataframe
-    """
-    lines = open(file_path, encoding='UTF-8').read().strip().split('\n')
-
-    return lines
 
 # Converts the unicode file to ascii
 def unicode_to_ascii(s):
