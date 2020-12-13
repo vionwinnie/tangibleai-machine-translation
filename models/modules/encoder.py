@@ -38,9 +38,7 @@ class Encoder(nn.Module):
         # output: max_length, batch_size, enc_units
         # self.hidden: 1, batch_size, enc_units
         output, self.hidden = self.gru(x, self.hidden) 
-        # gru returns hidden state of all timesteps as well as hidden state at last timestep
-        if self.debug:
-            print('output : {}, hidden : {}'.format(output.shape,self.hidden.shape))
+        # gru returns hidden state of all timesteps as well as hidden state at last timestep (which is the output) in PackedSequence data format
 
         # unpad the sequence to the max length in the batch
         output, _ = pad_packed_sequence(output)
