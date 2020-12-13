@@ -24,8 +24,6 @@ def load_raw_text_file(file_path,num_examples=None):
 
     return df
 
-
-
 # Converts the unicode file to ascii
 def unicode_to_ascii(s):
     """
@@ -71,5 +69,8 @@ def sort_batch(X, y, lengths):
     return X.transpose(0,1), y, lengths # transpose (batch x seq) to (seq x batch)
 
 if __name__=='__main__':
+    file_path="/home/winnie/qary/machine-translation/machine-translation/data/spa.txt/spa.txt"
+    df = load_raw_text_file(file_path,num_examples=300)
+    print(df.shape)
     sentence = "I am a man?"
     print(preprocess_sentence(sentence))
