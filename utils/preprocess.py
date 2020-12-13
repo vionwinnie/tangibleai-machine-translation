@@ -10,20 +10,7 @@ def test(file_path,num_examples=None):
     """
     lines = open(file_path, encoding='UTF-8').read().strip().split('\n')
 
-    # creates lists containing each pair
-    original_word_pairs = [[w for w in l.split('\t')] for l in lines]
-
-    if num_examples:
-        original_word_pairs = original_word_pairs[:num_examples]
-
-    # Store data as a Pandas dataframe
-    df = pd.DataFrame(original_word_pairs, columns=["eng", "es", 'info'])
-
-    # Now we do the preprocessing using pandas and lambdas
-    df["eng"] = df.eng.apply(lambda w: preprocess_sentence(w))
-    df["es"] = df.es.apply(lambda w: preprocess_sentence(w))
-
-    return df
+    return lines
 
 # Converts the unicode file to ascii
 def unicode_to_ascii(s):
@@ -71,7 +58,7 @@ def sort_batch(X, y, lengths):
 
 if __name__=='__main__':
     file_path="/home/winnie/qary/machine-translation/machine-translation/data/spa.txt/spa.txt"
-    df = test(file_path,num_examples=300)
-    print(df.shape)
+    data=test(file_path,num_examples=300)
+    print(data)
     sentence = "I am a man?"
     print(preprocess_sentence(sentence))
