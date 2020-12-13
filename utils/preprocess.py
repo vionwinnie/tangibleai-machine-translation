@@ -1,4 +1,7 @@
 import unicodedata,re
+import pandas as pd
+
+
 
 # Converts the unicode file to ascii
 def unicode_to_ascii(s):
@@ -26,7 +29,6 @@ def preprocess_sentence(w):
     # so that the model know when to start and stop predicting.
     w = '<start> ' + w + ' <end>'
     return w
-
 
 def max_length(tensor):
     return max(len(t) for t in tensor)
