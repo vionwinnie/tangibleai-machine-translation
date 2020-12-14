@@ -26,10 +26,19 @@ class Decoder(nn.Module):
     def forward(self, x, hidden, enc_output):
         # enc_output original: (max_length, batch_size, enc_units)
         # enc_output converted == (batch_size, max_length, hidden_size)
+
+        if self.debug:
+            print("x: {}".format(x.shape))
+            print("hidden: {}".format(hidden.shape))
+            print("enc output: {}".format(enc_output.shape))
+
         enc_output = enc_output.permute(1,0,2)
         # hidden shape == (batch_size, hidden size)
         # hidden_with_time_axis shape == (batch_size, 1, hidden size)
         # we are doing this to perform addition to calculate the score
+
+        if self.debug:
+            print("enc output after permutation: {}".format(enc_output.shape))
 
         # hidden shape == (batch_size, hidden size)
         # hidden_with_time_axis shape == (batch_size, 1, hidden size)
@@ -51,6 +60,8 @@ class Decoder(nn.Module):
             # takes case of the right portion of the model above (illustrated in red)
         x = self.embedding(x)
 
+        if self.debug:
+            print("dimension x after embedding layer: {}".format(x.shape))
         # x shape after concatenation == (batch_size, 1, embedding_dim + hidden_size)
         #x = tf.concat([tf.expand_dims(context_vector, 1), x], axis=-1)
         # ? Looks like attention vector in diagram of source
@@ -61,12 +72,20 @@ class Decoder(nn.Module):
         # output: (batch_size, 1, hidden_size)
         output, state = self.gru(x)
 
+        if self.debug:
+            print("output dim:{}, state dim: {}".format(output,state))
+
 
         # output shape == (batch_size * 1, hidden_size)
         output =  output.view(-1, output.size(2))
+        if self.debug:
+            print("output after reshape: {}".format(output.shape))
 
         # output shape == (batch_size * 1, vocab)
         x = self.fc(output)
+
+        if self.debug:
+            print("x after fully connected: {}".format(x.shape))
         
         if self.attention:
             return x, state, attention_weights

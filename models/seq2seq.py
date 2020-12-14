@@ -19,9 +19,12 @@ class Seq2Seq(nn.Module):
         self.vocab_inp_size = vocab_inp_size 
         self.vocab_out_size = vocab_out_size
         self.batch_size = config.get("batch_size", 64)
-        self.sampling_prob = config.get("sampling_prob", 0.)
         self.gpu = config.get("gpu", False)
         self.debug = config.get("debug",False)
+        self.training = False
+        
+        if config.get('loss') == 'cross_entropy':
+            self.loss_fn = torch.nn.CrossEntropyLoss(ignore_index=0)
 
         # Encoder
         self.encoder = Encoder(config,vocab_inp_size)
@@ -34,7 +37,6 @@ class Seq2Seq(nn.Module):
 
         print(config)
 
-    ##TODO:
     def encode(self,x,x_len):
         """
         Given Input Sequence, Pass the Data to Encode
@@ -47,12 +49,11 @@ class Seq2Seq(nn.Module):
         ## Check to see if batch_size parameter is fixed or base on input batch
         batch_size = x.size()[0]
         init_state = self.encoder.init_hidden(batch_size)
-        encoder_outputs, encoder_state, input_lengths = self.encoder.forward(x, init_state, x_len)
+        encoder_outputs, encoder_state = self.encoder.forward(x, init_state, x_len)
 
-        return encoder_outputs, encoder_state.squeeze(0)
+        return encoder_outputs, encoder_state
 
-    ##TODO:
-    def decode(self, encoder_outputs, encoder_hidden, targets, targets_lengths, input_lengths):
+    def decode(self, encoder_outputs, encoder_hidden, targets, targets_lengths):
         """
         Args:
             encoder_outputs: (B, T, H)
@@ -71,22 +72,19 @@ class Seq2Seq(nn.Module):
             labels: (B*L)
         """
         batch_size = encoder_outputs.size()[0]
+
+        ## TODO: Should this be a variable?
         max_length = targets.size()[1]
         decoder_input = Variable(torch.LongTensor([self.SOS] * batch_size)).squeeze(-1)
-        decoder_context = encoder_outputs.transpose(1, 0)[-1]
         decoder_hidden = encoder_hidden
-
-        alignments = Variable(torch.zeros(max_length, encoder_outputs.size(1), batch_size))
+    
         logits = Variable(torch.zeros(max_length, batch_size, self.decoder.output_size))
-
+        
         if self.gpu:
             decoder_input = decoder_input.cuda()
-            decoder_context = decoder_context.cuda()
             logits = logits.cuda()
-
-        ## Generate output one time step at a time
-        for t in range(max_length):
-
+        
+        for t in range(1,out_batch.size(1)):
             # The decoder accepts, at each time step t :
             # - an input, [B]
             # - a context, [B, H]
@@ -99,19 +97,45 @@ class Seq2Seq(nn.Module):
             # - a context, [B, H]
             # - an hidden state, [B, H]
             # - weights, [B, T]
-
-            outputs, hidden = self.decoder.forward(
-                    input=decoder_input.long(),
-                    hidden=decoder_hidden)
-
-            logits[t] = outputs
-            if self.training:
-                decoder_input = targets[:, t]
-            else:
-                decoder_input = outputs ## TODO: Check if the dimensions are matching
-        labels = targets.contiguous().view(-1)
             
-        ## Return final state, labels and alignments
-        return logits, labels.long(),alignments
+            # enc_hidden: 1, batch_size, enc_units
+            # output: max_length, batch_size, enc_units
+            predictions, decoder_hidden = self.decoder.forward(decoder_input.to(device),
+                                         decoder_hidden.to(device),
+                                         encoder_outputs.to(device))
 
+            ## Store Prediction at time step t
+            logits[t] = predictions
 
+            if self.training:
+                decoder_input = out_batch[:, t].unsqueeze(1)
+            else:
+                decoder_input = torch.argmax(predictions,axis=1).unsqueeze(1)
+
+        labels = targets.contiguous().view(-1)
+        mask_value = 0
+
+        ## Masking the logits to prepare for eval
+        logits = mask_3d(logits.transpose(1,0),targets_lengths,mask_value)
+        logits = logits.contiguous().view(-1,self.output_vocab_size)
+        if debug:
+            print("Logit dimension: {}, labels dimension".format(logits.shape,labels.shape))
+
+        ## Return final state, labels 
+        return logits, labels.long()
+
+    def step(self, batch):
+        x, y, x_len = batch
+        if self.gpu:
+            x = x.cuda()
+            y = y.cuda()
+            x_len = x_len.cuda()
+
+        encoder_out, encoder_state = self.encode(x, x_len)
+        logits, labels = self.decode(encoder_out, encoder_state, y, y_len, x_len)
+        return logits, labels
+
+    def loss(self, batch):
+        logits, labels, alignments = self.step(batch)
+        loss = self.loss_fn(logits, labels)
+        return loss, logits, labels, alignments
