@@ -5,6 +5,7 @@ import random
 
 from torch.autograd import Variable
 
+from tangiblemt.utils.preprocess import sort_batch
 from tangiblemt.models.modules.encoder import Encoder
 from tangiblemt.models.modules.decoder import Decoder
 from tangiblemt.models.helpers import mask_3d
@@ -49,7 +50,7 @@ class Seq2Seq(nn.Module):
         """
 
         ## Check to see if batch_size parameter is fixed or base on input batch
-        batch_size = x.size()[0]
+        cur_batch_size = x.size()[1]
         init_state = self.encoder.initialize_hidden_state(batch_size)
         encoder_outputs, encoder_state = self.encoder.forward(x, init_state, x_len)
 
@@ -128,12 +129,16 @@ class Seq2Seq(nn.Module):
 
     def step(self, batch):
         x, y, x_len = batch
-        if self.gpu:
-            x = x.cuda()
-            y = y.cuda()
-            x_len = x_len.cuda()
 
-        encoder_out, encoder_state = self.encode(x, x_len)
+        ## sort the batch for pack_padded_seq in forward function
+        x_sorted, y_sorted, x_len_sorted = sort_batch(inp_batch, out_batch, inp_batch_len)
+
+        if self.gpu:
+            x_sorted = x_sorted.cuda()
+            y_sorted = y_sorted.cuda()
+            x_len_sorted = x_len_sorted.cuda()
+
+        encoder_out, encoder_state = self.encode(x_sorted, x_len_sorted)
         logits, labels = self.decode(encoder_out, encoder_state, y, y_len, x_len)
         return logits, labels
 
