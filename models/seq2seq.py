@@ -128,7 +128,7 @@ class Seq2Seq(nn.Module):
         ## Masking the logits to prepare for eval
         logits = mask_3d(logits.transpose(1,0),targets_lengths,mask_value)
         logits = logits.contiguous().view(-1,self.vocab_out_size)
-        if debug:
+        if self.debug:
             print("Logit dimension: {}, labels dimension".format(logits.shape,labels.shape))
 
         ## Return final state, labels 
