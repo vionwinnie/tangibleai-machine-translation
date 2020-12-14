@@ -87,7 +87,7 @@ class Seq2Seq(nn.Module):
             decoder_input = decoder_input.cuda()
             logits = logits.cuda()
         
-        for t in range(1,out_batch.size(1)):
+        for t in range(1,max_length):
             # The decoder accepts, at each time step t :
             # - an input, [B]
             # - a context, [B, H]
