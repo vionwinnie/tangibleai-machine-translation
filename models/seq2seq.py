@@ -132,7 +132,7 @@ class Seq2Seq(nn.Module):
 
         ## sort the batch for pack_padded_seq in forward function
         x_sorted, y_sorted, x_len_sorted = sort_batch(x,y,x_len)
-        if debug:
+        if self.debug:
             print("x_sorted: {}".format(x_sorted.shape))
             print("y_sorted: {}".format(y_sorted.shape))
             print("x_len_sorted: {}".format(x_len_sorted.shape))
