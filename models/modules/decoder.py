@@ -93,6 +93,6 @@ class Decoder(nn.Module):
         else:
             return x, state
 
-    def initialize_hidden_state(selfi,batch_size):
+    def initialize_hidden_state(self,batch_size):
         return torch.zeros((1, batch_size, self.dec_units))
 
