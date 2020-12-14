@@ -51,7 +51,7 @@ class Seq2Seq(nn.Module):
 
         ## Check to see if batch_size parameter is fixed or base on input batch
         cur_batch_size = x.size()[1]
-        init_state = self.encoder.initialize_hidden_state(batch_size)
+        encode_init_state = self.encoder.initialize_hidden_state(batch_size)
         encoder_outputs, encoder_state = self.encoder.forward(x, init_state, x_len)
 
         return encoder_outputs, encoder_state
@@ -132,12 +132,15 @@ class Seq2Seq(nn.Module):
 
         ## sort the batch for pack_padded_seq in forward function
         x_sorted, y_sorted, x_len_sorted = sort_batch(inp_batch, out_batch, inp_batch_len)
-
+        if debug:
+            print("x_sorted: {}".format(x_sorted.shape))
+            print("y_sorted: {}".format(y_sorted.shape))
+            print("x_len_sorted: {}".format(x_len_sorted.shape))
         if self.gpu:
             x_sorted = x_sorted.cuda()
             y_sorted = y_sorted.cuda()
             x_len_sorted = x_len_sorted.cuda()
-
+        
         encoder_out, encoder_state = self.encode(x_sorted, x_len_sorted)
         logits, labels = self.decode(encoder_out, encoder_state, y, y_len, x_len)
         return logits, labels
