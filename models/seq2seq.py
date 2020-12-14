@@ -84,6 +84,8 @@ class Seq2Seq(nn.Module):
             print("decoder_input dim: {}".format(decoder_input.shape))
             print("decoder hidden dim:{}".format(decoder_hidden.shape))
             print("encoder output dim:{}".format(encoder_outputs.shape))
+            print("targets dim: {}".format(targets.shape))
+            print("targets_length: {}".format(targets_lengths))
     
         logits = Variable(torch.zeros(max_length, batch_size, self.decoder.vocab_size))
         
@@ -116,7 +118,7 @@ class Seq2Seq(nn.Module):
             logits[t] = predictions
 
             if self.training:
-                decoder_input = out_batch[:, t].unsqueeze(1)
+                decoder_input = targets[:, t].unsqueeze(1)
             else:
                 decoder_input = torch.argmax(predictions,axis=1).unsqueeze(1)
 
