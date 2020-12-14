@@ -138,6 +138,6 @@ class Seq2Seq(nn.Module):
         return logits, labels
 
     def loss(self, batch):
-        logits, labels, alignments = self.step(batch)
+        logits, labels = self.step(batch)
         loss = self.loss_fn(logits, labels)
-        return loss, logits, labels, alignments
+        return loss, logits, labels
