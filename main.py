@@ -4,12 +4,12 @@ import json
 import os
 
 from training import train, evaluate
-from tangiblemt.models.seq2seq import Seq2Seq
+from models.seq2seq import Seq2Seq
 from torch.utils import data
 
-import tangiblemt.utils.load_raw_data as dl
-from tangiblemt.utils.data_generator import MyData, LanguageIndex
-import tangiblemt.utils.preprocess as dp
+import utils.load_raw_data as dl
+from utils.data_generator import MyData, LanguageIndex
+import utils.preprocess as dp
 
 from sklearn.model_selection import train_test_split
 
