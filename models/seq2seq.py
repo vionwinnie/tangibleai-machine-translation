@@ -85,7 +85,7 @@ class Seq2Seq(nn.Module):
             print("decoder hidden dim:{}".format(decoder_hidden.shape))
             print("encoder output dim:{}".format(encoder_outputs.shape))
             print("targets dim: {}".format(targets.shape))
-            print("targets_length: {}".format(targets_lengths))
+            print("targets_length: {}".format(targets_lengths.shape))
     
         logits = Variable(torch.zeros(max_length, batch_size, self.decoder.vocab_size))
         
@@ -129,8 +129,8 @@ class Seq2Seq(nn.Module):
         logits = mask_3d(logits.transpose(1,0),targets_lengths,mask_value)
         logits = logits.contiguous().view(-1,self.vocab_out_size)
         if self.debug:
-            print("Logit dimension: {}, labels dimension".format(logits.shape,labels.shape))
-
+            print("Logit dimension: {}".format(logits.shape))
+            print("Label dimension: {}".format(labels.shape))
         ## Return final state, labels 
         return logits, labels.long()
 

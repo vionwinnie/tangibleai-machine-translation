@@ -4,15 +4,20 @@ import json
 import os
 
 from training import train, evaluate
-from models.seq2seq import Seq2Seq
+from tangiblemt.models.seq2seq import Seq2Seq
 from torch.utils import data
-from utils.data_generator import ToyDataset, pad_collate
 
+import tangiblemt.utils.load_raw_data as dl
+from tangiblemt.utils.data_generator import MyData, LanguageIndex
+import tangiblemt.utils.preprocess as dp
+
+from sklearn.model_selection import train_test_split
 
 def run():
-    USE_CUDA = torch.cuda.is_available()
 
-    config_path = os.path.join("experiments", FLAGS.config)
+    ## Load Config from JSON file
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    config_path = os.path.join(dir_path,"experiments", FLAGS.config)
 
     if not os.path.exists(config_path):
         raise FileNotFoundError
@@ -21,45 +26,55 @@ def run():
         config = json.load(f)
 
     config["gpu"] = torch.cuda.is_available()
+    
+    ## Load Data
+    df = dl.load_raw_text_file(FLAGS.data_path,num_examples=30000)
 
-    dataset = ToyDataset(5, 15)
-    eval_dataset = ToyDataset(5, 15, type='eval')
-    BATCHSIZE = 30
-    train_loader = data.DataLoader(dataset, batch_size=BATCHSIZE, shuffle=False, collate_fn=pad_collate, drop_last=True)
-    eval_loader = data.DataLoader(eval_dataset, batch_size=BATCHSIZE, shuffle=False, collate_fn=pad_collate,
-                                  drop_last=True)
-    config["batch_size"] = BATCHSIZE
+    # index language for Input and Output
+    inp_index = LanguageIndex(phrases=df["es"].values)
+    targ_index = LanguageIndex(df["eng"].values)
+    vocab_inp_size = len(inp_index.word2idx)
+    vocab_tar_size = len(targ_index.word2idx)
 
+    # Convert Sentences into tokenized tensors
+    input_tensor,target_tensor = dl.convert_tensor(df,inp_index,targ_index)
+    # Split to training and test set
+    input_tensor_train, input_tensor_val, target_tensor_train, target_tensor_val = train_test_split(input_tensor, target_tensor, test_size=0.2)
+    train_dataset = MyData(input_tensor_train, target_tensor_train)
+    val_dataset = MyData(input_tensor_val, target_tensor_val)
+
+    # Conver to DataLoader Object
+    train_dataset = DataLoader(train_dataset,
+                     batch_size=BATCH_SIZE, 
+                     drop_last=True,
+                     shuffle=True)
+
+    eval_dataset = DataLoader(val_dataset,
+                     batch_size=BATCH_SIZE, 
+                     drop_last=False,
+                     shuffle=True)
     # Models
-    model = Seq2Seq(config)
+    model = Seq2Seq(config,vocab_inp_size,vocab_tar_size)
 
-    if USE_CUDA:
+    if config['gpu']:
         model = model.cuda()
 
     # Optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=config.get("learning_rate", .001))
 
-    print("=" * 60)
-    print(model)
-    print("=" * 60)
-    for k, v in sorted(config.items(), key=lambda i: i[0]):
-        print(" (" + k + ") : " + str(v))
-    print()
-    print("=" * 60)
-
-    print("\nInitializing weights...")
     for name, param in model.named_parameters():
         if 'bias' in name:
             torch.nn.init.constant_(param, 0.0)
         elif 'weight' in name:
             torch.nn.init.xavier_normal_(param)
+    print("Weight Initialized")
 
     for epoch in range(FLAGS.epochs):
-        run_state = (epoch, FLAGS.epochs, FLAGS.train_size)
+        run_state = (epoch, FLAGS.epochs)
 
         # Train needs to return model and optimizer, otherwise the model keeps restarting from zero at every epoch
-        model, optimizer = train(model, optimizer, train_loader, run_state)
-        evaluate(model, eval_loader)
+        model, optimizer = train(model, optimizer, train_dataset, run_state)
+        metrics = evaluate(model, eval_dataset)
 
     # TODO implement save models function
 
@@ -67,10 +82,9 @@ def run():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument('--data_path', type=str)
     parser.add_argument('--config', type=str)
     parser.add_argument('--epochs', default=20, type=int)
-    parser.add_argument('--train_size', default=28000, type=int)
-    parser.add_argument('--eval_size', default=2600, type=int)
     FLAGS, _ = parser.parse_known_args()
     run()
 
