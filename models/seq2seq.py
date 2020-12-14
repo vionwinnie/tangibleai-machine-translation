@@ -75,11 +75,9 @@ class Seq2Seq(nn.Module):
             logits: (B*L, V)
             labels: (B*L)
         """
-        batch_size = encoder_outputs.size()[0]
-
-        ## TODO: Should this be a variable?
+        batch_size = encoder_outputs.size()[1]
         max_length = targets.size()[1]
-        decoder_input = torch.tensor([self.SOS]*batch_size)
+        decoder_input = torch.tensor([[self.SOS]]* batch_size)
         decoder_hidden = encoder_hidden
 
         if self.debug:
