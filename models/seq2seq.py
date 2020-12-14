@@ -79,13 +79,19 @@ class Seq2Seq(nn.Module):
 
         ## TODO: Should this be a variable?
         max_length = targets.size()[1]
-        decoder_input = Variable(torch.LongTensor([self.SOS] * batch_size)).squeeze(-1)
+        decoder_input = torch.tensor([self.SOS]*batch_size)
         decoder_hidden = encoder_hidden
+
+        if self.debug:
+            print("decoder_input dim: {}".format(decoder_input.shape))
+            print("decoder hidden dim:{}".format(decoder_hidden.shape))
+            print("encoder output dim:{}".format(encoder_outputs.shape))
     
         logits = Variable(torch.zeros(max_length, batch_size, self.decoder.vocab_size))
         
         if self.gpu:
             decoder_input = decoder_input.cuda()
+            decoder_hidden = decoder_hidden.cuda()
             logits = logits.cuda()
         
         for t in range(1,max_length):
