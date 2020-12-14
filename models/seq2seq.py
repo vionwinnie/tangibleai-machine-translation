@@ -131,18 +131,20 @@ class Seq2Seq(nn.Module):
         x, y, x_len,y_len = batch
 
         ## sort the batch for pack_padded_seq in forward function
-        x_sorted, y_sorted, x_len_sorted = sort_batch(x,y,x_len)
+        x_sorted, y_sorted, x_len_sorted, y_len_sorted = sort_batch(x,y,x_len,y_len)
         if self.debug:
             print("x_sorted: {}".format(x_sorted.shape))
             print("y_sorted: {}".format(y_sorted.shape))
             print("x_len_sorted: {}".format(x_len_sorted.shape))
+            print("y_len_sorted: {}".format(y_len_sorted.shape))
         if self.gpu:
             x_sorted = x_sorted.cuda()
             y_sorted = y_sorted.cuda()
             x_len_sorted = x_len_sorted.cuda()
+            y_len_sorted = y_len_sorted.cuda()
         
         encoder_out, encoder_state = self.encode(x_sorted, x_len_sorted)
-        logits, labels = self.decode(encoder_out, encoder_state, y, x_len,y_len)
+        logits, labels = self.decode(encoder_out, encoder_state, y_sorted, y_len_sorted)
         return logits, labels
 
     def loss(self, batch):
