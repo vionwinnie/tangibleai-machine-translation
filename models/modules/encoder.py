@@ -9,7 +9,6 @@ class Encoder(nn.Module):
     def __init__(self, config,vocab_size):
         super(Encoder, self).__init__()
         self.gpu =  config.get('gpu',False)
-        self.batch_sz = config.get('batch_size',64)
         self.enc_units = config.get('encoder_hidden',1024)
         self.vocab_size = vocab_size
         self.embedding_dim = config.get('embedding_dim',256)
@@ -18,7 +17,7 @@ class Encoder(nn.Module):
         self.gru = nn.GRU(self.embedding_dim, self.enc_units)
         self.debug = config.get('debug',False)
 
-    def forward(self, x, lens):
+    def forward(self, x, init_state,lens):
         # x: batch_size, max_length 
         if self.debug:
             print("Input size: {}".format(x.shape))
@@ -33,7 +32,7 @@ class Encoder(nn.Module):
         # x = x.permute(1,0,2)
         x = pack_padded_sequence(x, lens)
     
-        self.hidden = self.initialize_hidden_state()
+        self.hidden = init_state
         
         # output: max_length, batch_size, enc_units
         # self.hidden: 1, batch_size, enc_units
@@ -48,8 +47,8 @@ class Encoder(nn.Module):
         
         return output, self.hidden
 
-    def initialize_hidden_state(self):
-        output = torch.zeros((1,self.batch_sz,self.enc_units)).to(self.device)
+    def initialize_hidden_state(self,batch_size):
+        output = torch.zeros((1,batch_size,self.enc_units)).to(self.device)
         if self.debug:
             print("initialized hidden state dim : {}".format(output.shape))
         return output

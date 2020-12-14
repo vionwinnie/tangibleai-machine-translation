@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import random
 
-from utils.misc import check_size
 from torch.autograd import Variable
 from models.modules.encoders import Encoder
 from models.modules.decoders import Decoder
@@ -13,19 +12,22 @@ class Seq2Seq(nn.Module):
         Sequence to sequence module
     """
 
-    def __init__(self, config):
+    def __init__(self, config,vocab_inp_size,vocab_out_size):
         super(Seq2Seq, self).__init__()
-        self.SOS = config.get("start_index", 1),
-        self.vocab_size = config.get("n_classes", 32)
-        self.batch_size = config.get("batch_size", 1)
+        self.SOS = config.get("start_index", 5)
+        self.EOS = config.get("end_index",4)
+        self.vocab_inp_size = vocab_inp_size 
+        self.vocab_out_size = vocab_out_size
+        self.batch_size = config.get("batch_size", 64)
         self.sampling_prob = config.get("sampling_prob", 0.)
         self.gpu = config.get("gpu", False)
+        self.debug = config.get("debug",False)
 
         # Encoder
-        self.encoder = Encoder(config)
+        self.encoder = Encoder(config,vocab_inp_size)
 
         # Decoder
-        self.decoder = Decoder(config)
+        self.decoder = Decoder(config,vocab_out_size)
 
         # Loss Function
         self.loss_fn = torch.nn.CrossEntropyLoss(ignore_index=0)
