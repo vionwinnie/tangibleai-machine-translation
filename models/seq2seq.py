@@ -25,6 +25,7 @@ class Seq2Seq(nn.Module):
         self.gpu = config.get("gpu", False)
         self.debug = config.get("debug",False)
         self.training = False
+        self.device = torch.device("cuda" if self.gpu else "cpu")
         
         if config.get('loss') == 'cross_entropy':
             self.loss_fn = torch.nn.CrossEntropyLoss(ignore_index=0)
@@ -103,9 +104,9 @@ class Seq2Seq(nn.Module):
             
             # enc_hidden: 1, batch_size, enc_units
             # output: max_length, batch_size, enc_units
-            predictions, decoder_hidden = self.decoder.forward(decoder_input.to(device),
-                                         decoder_hidden.to(device),
-                                         encoder_outputs.to(device))
+            predictions, decoder_hidden = self.decoder.forward(decoder_input.to(self.device),
+                                         decoder_hidden.to(self.device),
+                                         encoder_outputs.to(self.device))
 
             ## Store Prediction at time step t
             logits[t] = predictions
