@@ -81,7 +81,7 @@ class Seq2Seq(nn.Module):
         decoder_input = Variable(torch.LongTensor([self.SOS] * batch_size)).squeeze(-1)
         decoder_hidden = encoder_hidden
     
-        logits = Variable(torch.zeros(max_length, batch_size, self.decoder.output_size))
+        logits = Variable(torch.zeros(max_length, batch_size, self.decoder.vocab_size))
         
         if self.gpu:
             decoder_input = decoder_input.cuda()
