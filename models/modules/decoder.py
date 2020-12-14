@@ -74,7 +74,7 @@ class Decoder(nn.Module):
         output, state = self.gru(x)
 
         if self.debug:
-            print("output dim:{}, state dim: {}".format(output,state))
+            print("output dim:{}, state dim: {}".format(output.shape,state.shape))
 
 
         # output shape == (batch_size * 1, hidden_size)

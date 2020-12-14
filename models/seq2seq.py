@@ -4,8 +4,10 @@ import torch.nn.functional as F
 import random
 
 from torch.autograd import Variable
-from models.modules.encoders import Encoder
-from models.modules.decoders import Decoder
+
+from tangiblemt.models.modules.encoders import Encoder
+from tangiblemt.models.modules.decoders import Decoder
+from tangiblemt.models.helpers import mask_3d
 
 class Seq2Seq(nn.Module):
     """
