@@ -17,6 +17,7 @@ class Decoder(nn.Module):
                           batch_first=True)
         self.fc = nn.Linear(self.dec_units, self.vocab_size)
         self.attention=False
+        self.debug=config.get("debug",False)
 
         # used for attention
         #self.W1 = nn.Linear(self.enc_units, self.dec_units)
