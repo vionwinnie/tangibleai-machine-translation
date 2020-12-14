@@ -12,10 +12,10 @@ class Decoder(nn.Module):
         self.vocab_size = vocab_size
         self.embedding_dim = config.get("embedding_dim",256)
         self.embedding = nn.Embedding(self.vocab_size, self.embedding_dim)
-        self.gru = nn.GRU(self.embedding_dim + self.enc_units,
+        self.gru = nn.GRU(self.embedding_dim,
                           self.dec_units,
                           batch_first=True)
-        self.fc = nn.Linear(self.enc_units, self.vocab_size)
+        self.fc = nn.Linear(self.dec_units, self.vocab_size)
         self.attention=False
 
         # used for attention
