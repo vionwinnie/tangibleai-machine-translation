@@ -10,13 +10,16 @@ class MyData(Dataset):
         self.data = X
         self.target = y
         # TODO: convert this into torch code is possible
-        self.length = [ np.sum(1 - np.equal(x, 0)) for x in X]
+        self.data_length = [ np.sum(1 - np.equal(x, 0)) for x in X]
+        self.target_length = [ np.sum(1 - np.equal(x, 0)) for x in y]
+
         
     def __getitem__(self, index):
         x = self.data[index]
         y = self.target[index]
-        x_len = self.length[index]
-        return x,y,x_len
+        x_len = self.data_length[index]
+        y_len = self.target_length[index]
+        return x,y,x_len,y_len
     
     def __len__(self):
         return len(self.data)

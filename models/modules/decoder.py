@@ -1,24 +1,23 @@
+""" This is the decoder module that decodes high-dimensional vector from Encoder"""
+
 import torch
-import torch.functional as F
 import torch.nn as nn
-import torch.optim as optim
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 class Decoder(nn.Module):
     def __init__(self, config,vocab_size):
         super(Decoder, self).__init__()
-        self.dec_units = config.get("decoder_hidden",64)
-        self.enc_units = config.get("encoder_hidden",64)
+        self.dec_units = config.get("decoder_hidden", 64)
+        self.enc_units = config.get("encoder_hidden", 64)
         self.vocab_size = vocab_size
-        self.embedding_dim = config.get("embedding_dim",256)
+        self.embedding_dim = config.get("embedding_dim", 256)
         self.embedding = nn.Embedding(self.vocab_size, self.embedding_dim)
         self.gru = nn.GRU(self.embedding_dim,
                           self.dec_units,
                           batch_first=True)
         self.fc = nn.Linear(self.dec_units, self.vocab_size)
-        self.attention=False
+        self.attention = False
         self.debug=config.get("debug",False)
-
         # used for attention
         #self.W1 = nn.Linear(self.enc_units, self.dec_units)
         #self.W2 = nn.Linear(self.enc_units, self.dec_units)
@@ -33,7 +32,7 @@ class Decoder(nn.Module):
             print("hidden: {}".format(hidden.shape))
             print("enc output: {}".format(enc_output.shape))
 
-        enc_output = enc_output.permute(1,0,2)
+        enc_output = enc_output.permute(1, 0, 2)
         # hidden shape == (batch_size, hidden size)
         # hidden_with_time_axis shape == (batch_size, 1, hidden size)
         # we are doing this to perform addition to calculate the score
@@ -75,10 +74,8 @@ class Decoder(nn.Module):
 
         if self.debug:
             print("output dim:{}, state dim: {}".format(output.shape,state.shape))
-
-
         # output shape == (batch_size * 1, hidden_size)
-        output =  output.view(-1, output.size(2))
+        output = output.view(-1, output.size(2))
         if self.debug:
             print("output after reshape: {}".format(output.shape))
 
@@ -87,12 +84,11 @@ class Decoder(nn.Module):
 
         if self.debug:
             print("x after fully connected: {}".format(x.shape))
-        
         if self.attention:
             return x, state, attention_weights
         else:
             return x, state
 
-    def initialize_hidden_state(self,batch_size):
+    def initialize_hidden_state(self, batch_size):
         return torch.zeros((1, batch_size, self.dec_units))
 

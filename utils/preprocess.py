@@ -40,11 +40,12 @@ def pad_sequences(x, max_len):
 
 ### sort batch function to be able to use with pad_packed_sequence
 ### Can be use for bucketing later to reduce time complexity while training
-def sort_batch(X, y, lengths):
-    lengths, indx = lengths.sort(dim=0, descending=True)
+def sort_batch(X, y, x_length,y_length):
+    x_length, indx = x_length.sort(dim=0, descending=True)
     X = X[indx]
     y = y[indx]
-    return X.transpose(0,1), y, lengths # transpose (batch x seq) to (seq x batch)
+    y_length = y_length[indx]
+    return X.transpose(0,1), y, x_length, y_length # transpose (batch x seq) to (seq x batch)
 
 if __name__=='__main__':
     sentence = "I am a man?"

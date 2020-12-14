@@ -1,7 +1,6 @@
+""" This is the encoder module encapsulated within Seq2Seq """
 import torch
-import torch.functional as F
 import torch.nn as nn
-import torch.optim as optim
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 
@@ -16,24 +15,21 @@ class Encoder(nn.Module):
         self.device = torch.device("cuda" if self.gpu else "cpu")
         self.gru = nn.GRU(self.embedding_dim, self.enc_units)
         self.debug = config.get('debug',False)
+        self.hidden = None
 
     def forward(self, x, init_state,lens):
         # x: batch_size, max_length 
         if self.debug:
             print("Input size: {}".format(x.shape))
-        
         # x: batch_size, max_length, embedding_dim
         x = self.embedding(x) 
-        
         if self.debug:
             print("After embedding layer: {}".format(x.shape))
-                
         # x transformed = max_len X batch_size X embedding_dim
         # x = x.permute(1,0,2)
         x = pack_padded_sequence(x, lens)
     
         self.hidden = init_state
-        
         # output: max_length, batch_size, enc_units
         # self.hidden: 1, batch_size, enc_units
         output, self.hidden = self.gru(x, self.hidden) 
@@ -48,7 +44,7 @@ class Encoder(nn.Module):
         return output, self.hidden
 
     def initialize_hidden_state(self,batch_size):
-        output = torch.zeros((1,batch_size,self.enc_units)).to(self.device)
+        output = torch.zeros((1, batch_size, self.enc_units)).to(self.device)
         if self.debug:
             print("initialized hidden state dim : {}".format(output.shape))
         return output
