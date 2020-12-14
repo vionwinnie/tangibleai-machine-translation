@@ -17,6 +17,7 @@ def run():
 
     ## Load Config from JSON file
     dir_path = os.path.dirname(os.path.realpath(__file__))
+    print(dir_path)
     config_path = os.path.join(dir_path,"experiments", FLAGS.config)
 
     if not os.path.exists(config_path):
@@ -86,6 +87,7 @@ if __name__ == '__main__':
     parser.add_argument('--config', type=str)
     parser.add_argument('--epochs', default=20, type=int)
     FLAGS, _ = parser.parse_known_args()
+    print(FLAGS)
     run()
 
 
