@@ -128,7 +128,7 @@ class Seq2Seq(nn.Module):
         return logits, labels.long()
 
     def step(self, batch):
-        x, y, x_len = batch
+        x, y, x_len,y_len = batch
 
         ## sort the batch for pack_padded_seq in forward function
         x_sorted, y_sorted, x_len_sorted = sort_batch(x,y,x_len)
@@ -142,7 +142,7 @@ class Seq2Seq(nn.Module):
             x_len_sorted = x_len_sorted.cuda()
         
         encoder_out, encoder_state = self.encode(x_sorted, x_len_sorted)
-        logits, labels = self.decode(encoder_out, encoder_state, y, y_len, x_len)
+        logits, labels = self.decode(encoder_out, encoder_state, y, x_len,y_len)
         return logits, labels
 
     def loss(self, batch):
