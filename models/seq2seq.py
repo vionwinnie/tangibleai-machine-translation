@@ -5,8 +5,8 @@ import random
 
 from torch.autograd import Variable
 
-from tangiblemt.models.modules.encoders import Encoder
-from tangiblemt.models.modules.decoders import Decoder
+from tangiblemt.models.modules.encoder import Encoder
+from tangiblemt.models.modules.decoder import Decoder
 from tangiblemt.models.helpers import mask_3d
 
 class Seq2Seq(nn.Module):
