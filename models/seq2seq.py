@@ -5,10 +5,10 @@ import random
 
 from torch.autograd import Variable
 
-from tangiblemt.utils.preprocess import sort_batch
-from tangiblemt.models.modules.encoder import Encoder
-from tangiblemt.models.modules.decoder import Decoder
-from tangiblemt.models.helpers import mask_3d
+from utils.preprocess import sort_batch
+from models.modules.encoder import Encoder
+from models.modules.decoder import Decoder
+from models.helpers import mask_3d
 
 class Seq2Seq(nn.Module):
     """

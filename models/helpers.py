@@ -1,7 +1,5 @@
-
- 
+""" This script has multiple helper functions for Tensor manipulation""" 
 import torch
-
 
 def mask_3d(inputs, seq_len, mask_value=0.):
     batches = inputs.size()[0]
@@ -15,7 +13,6 @@ def mask_3d(inputs, seq_len, mask_value=0.):
                 assert len(inputs.size()) == 2, "The size of inputs must be 2 or 3, received {}".format(inputs.size())
                 inputs[n, idx.int():] = mask_value
     return inputs
-
 
 def skip_add_pyramid(x, seq_len, skip_add="add"):
     if len(x.size()) == 2:

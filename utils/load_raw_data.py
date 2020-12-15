@@ -1,8 +1,8 @@
 """This module loads data"""
 
 import pandas as pd
-import tangiblemt.utils.preprocess as dp
-from tangiblemt.utils.data_generator import MyData, LanguageIndex
+import utils.preprocess as dp
+from utils.data_generator import MyData, LanguageIndex
 
 def load_raw_text_file(file_path,num_examples=None):
     """
