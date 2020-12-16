@@ -13,7 +13,7 @@ class Encoder(nn.Module):
         self.embedding_dim = config.get('embedding_dim',256)
         self.embedding = nn.Embedding(self.vocab_size, self.embedding_dim)
         self.device = torch.device("cuda" if self.gpu else "cpu")
-        self.gru = nn.GRU(self.embedding_dim, self.enc_units)
+        self.lstm = nn.GRU(self.embedding_dim, self.enc_units)
         self.debug = config.get('debug',False)
         self.hidden = None
 
@@ -32,8 +32,8 @@ class Encoder(nn.Module):
         self.hidden = init_state
         # output: max_length, batch_size, enc_units
         # self.hidden: 1, batch_size, enc_units
-        output, self.hidden = self.gru(x, self.hidden) 
-        # gru returns hidden state of all timesteps as well as hidden state at last timestep (which is the output) in PackedSequence data format
+        output, self.hidden = self.lstm(x, self.hidden) 
+        # LSTM returns hidden state of all timesteps as well as hidden state at last timestep (which is the output) in PackedSequence data format
 
         # unpad the sequence to the max length in the batch (max_length,batch_size,num_encoding_units)
         output, _ = pad_packed_sequence(output)
