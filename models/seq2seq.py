@@ -88,11 +88,13 @@ class Seq2Seq(nn.Module):
             print("targets_length: {}".format(targets_lengths.shape))
     
         logits = Variable(torch.zeros(max_length, batch_size, self.decoder.vocab_size))
-        
+        final_sentences = Variable(torch.zeros(batch_size,max_length))
+
         if self.gpu:
             decoder_input = decoder_input.cuda()
             decoder_hidden = decoder_hidden.cuda()
             logits = logits.cuda()
+            final_sentences = final_sentences.cuda()
         
         for t in range(1,max_length):
             # The decoder accepts, at each time step t :
@@ -117,10 +119,12 @@ class Seq2Seq(nn.Module):
             ## Store Prediction at time step t
             logits[t] = predictions
 
+
             if self.training:
                 decoder_input = targets[:, t].unsqueeze(1)
             else:
                 decoder_input = torch.argmax(predictions,axis=1).unsqueeze(1)
+                final_sentences[:,t] = decoder_input
 
         labels = targets.contiguous().view(-1)
         mask_value = 0
@@ -132,7 +136,7 @@ class Seq2Seq(nn.Module):
             print("Logit dimension: {}".format(logits.shape))
             print("Label dimension: {}".format(labels.shape))
         ## Return final state, labels 
-        return logits, labels.long()
+        return logits, labels.long(), final_sentences
 
     def step(self, batch):
         x, y, x_len,y_len = batch
@@ -151,10 +155,10 @@ class Seq2Seq(nn.Module):
             y_len_sorted = y_len_sorted.cuda()
         
         encoder_out, encoder_state = self.encode(x_sorted, x_len_sorted)
-        logits, labels = self.decode(encoder_out, encoder_state, y_sorted, y_len_sorted)
-        return logits, labels
+        logits, labels, final_sentences = self.decode(encoder_out, encoder_state, y_sorted, y_len_sorted)
+        return logits, labels, final_sentences
 
     def loss(self, batch):
-        logits, labels = self.step(batch)
+        logits, labels, final_sentences = self.step(batch)
         loss = self.loss_fn(logits, labels)
-        return loss, logits, labels
+        return loss, logits, labels, final_sentences

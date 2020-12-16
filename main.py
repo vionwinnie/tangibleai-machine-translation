@@ -89,7 +89,7 @@ def run():
         all_train_avg_loss.append(train_avg_loss)
 
         # Return Val Set Loss and Accuracy
-        eval_avg_loss, eval_acc = evaluate(model, eval_dataset)
+        eval_avg_loss, eval_acc = evaluate(model, eval_dataset,targ_index)
         all_eval_avg_loss.append(eval_avg_loss)
         all_eval_avg_acc.append(eval_acc)
 
@@ -128,7 +128,6 @@ if __name__ == '__main__':
     parser.add_argument('--model_checkpoint_dir',type=Path)
     parser.add_argument('--metrics_dir',type=Path)
     FLAGS, _ = parser.parse_known_args()
-    print("flags----------",FLAGS)
     run()
 
 

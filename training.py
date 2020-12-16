@@ -22,7 +22,7 @@ def train(model, optimizer, train_loader, state):
 
     for batch in t:
         t.set_description("Epoch {:.0f}/{:.0f} (train={})".format(epoch, n_epochs, model.training))
-        loss, _, _ = model.loss(batch)
+        loss, _, _, _ = model.loss(batch)
         losses.append(loss.item())
         # Reset gradients
         optimizer.zero_grad()
