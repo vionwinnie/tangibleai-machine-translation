@@ -3,6 +3,9 @@ import torch
 import json
 import os
 from pathlib import Path
+import pandas as pd
+from datetime import datetime
+
 
 from training import train, evaluate
 from models.seq2seq import Seq2Seq
@@ -48,13 +51,13 @@ def run():
     val_dataset = MyData(input_tensor_val, target_tensor_val)
 
     # Conver to DataLoader Object
-    train_dataset = DataLoader(train_dataset,
-                     batch_size=BATCH_SIZE, 
+    train_dataset = data.DataLoader(train_dataset,
+                     batch_size=config['batch_size'], 
                      drop_last=True,
                      shuffle=True)
 
-    eval_dataset = DataLoader(val_dataset,
-                     batch_size=BATCH_SIZE, 
+    eval_dataset = data.DataLoader(val_dataset,
+                     batch_size=config['batch_size'], 
                      drop_last=False,
                      shuffle=True)
     # Models
@@ -73,22 +76,57 @@ def run():
             torch.nn.init.xavier_normal_(param)
     print("Weight Initialized")
 
+    ## Train and Evaluate over epochs
+    all_train_avg_loss = []
+    all_eval_avg_loss = []
+    all_eval_avg_acc = []
+
     for epoch in range(FLAGS.epochs):
         run_state = (epoch, FLAGS.epochs)
 
         # Train needs to return model and optimizer, otherwise the model keeps restarting from zero at every epoch
-        model, optimizer = train(model, optimizer, train_dataset, run_state)
-        metrics = evaluate(model, eval_dataset)
+        model, optimizer,train_avg_loss = train(model, optimizer, train_dataset, run_state)
+        all_train_avg_loss.append(train_avg_loss)
 
-    # TODO implement save models function
+        # Return Val Set Loss and Accuracy
+        eval_avg_loss, eval_acc = evaluate(model, eval_dataset)
+        all_eval_avg_loss.append(eval_avg_loss)
+        all_eval_avg_acc.append(eval_acc)
 
-    # TODO to record model training loss changes 
+        # Save Model Checkpoint
+        checkpoint_dict = {
+            'epoch': epoch,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'loss': eval_avg_loss,
+            } 
+        
+        checkpoint_path = '{}/epoch_{:0.0f}_val_loss_{:0.3f}.pt'.format(FLAGS.model_checkpoint_dir,epoch,eval_avg_loss)
+        torch.save(checkpoint_dict,checkpoint_path)
+
+    # Export Model Learning Curve Info
+    df = pd.DataFrame({
+        'epoch':range(FLAGS.epochs),
+        'train_loss': all_train_avg_loss,
+        'eval_loss': all_eval_avg_loss,
+        'eval_acc': all_eval_avg_acc
+        })
+
+    now = datetime.now() 
+    current_time = now.strftime("%Y%m%d%H%M%S")
+    export_path = '{}/{}_{:0.0f}_bz_{}_val_loss_{:0.3f}.csv'.format(FLAGS.metrics_dir,current_time,FLAGS.epochs,config['batch_size'],eval_avg_loss)
+    df.to_csv(export_path,index=False)
+
+
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data_path', type=Path)
     parser.add_argument('--config', type=str)
     parser.add_argument('--epochs', default=20, type=int)
+    parser.add_argument('--data_path', type=Path)
+    parser.add_argument('--model_checkpoint_dir',type=Path)
+    parser.add_argument('--metrics_dir',type=Path)
     FLAGS, _ = parser.parse_known_args()
     print("flags----------",FLAGS)
     run()
