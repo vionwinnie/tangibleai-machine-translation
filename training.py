@@ -32,9 +32,11 @@ def train(model, optimizer, train_loader, state):
         t.set_postfix(loss='{:05.3f}'.format(loss.item()), avg_loss='{:05.3f}'.format(np.mean(losses)))
         t.update()
 
-    return model, optimizer
+    avg_loss = np.mean(losses)
 
-def evaluate(model, eval_loader):
+    return model, optimizer,avg_loss
+
+def evaluate(model, eval_loader,targIdx):
 
     losses = []
     accs = []
@@ -45,14 +47,15 @@ def evaluate(model, eval_loader):
     with torch.no_grad():
         for batch in t:
             t.set_description(" Evaluating... (train={})".format(model.training))
-            loss, logits, labels = model.loss(batch)
+            loss, logits, labels , sentence_pred = model.loss(batch)
             preds = logits.detach().cpu().numpy()
+
             # acc = np.sum(np.argmax(preds, -1) == labels.detach().cpu().numpy()) / len(preds)
             ## This is where I need to work on plugging in Bag of Words/ BLEU Score / in this repo, it uses Levenshtein distance to measure how similar two strings are, but to do that, I need to translate the phrases first, I will use that next
             acc = 100 * editdistance.eval(np.argmax(preds, -1), labels.detach().cpu().numpy()) / len(preds)
             losses.append(loss.item())
             accs.append(acc)
-            t.set_postfix(avg_acc='{:05.3f}'.format(np.mean(accs)), avg_loss='{:05.3f}'.format(np.mean(losses)))
+            t.set_postfix(avg_acc='{:05.3f}'.format(np.mean(accs)), avg_loss='{}'.format(np.mean(losses)))
             t.update()
 
     # Uncomment if you want to visualise weights
@@ -60,4 +63,11 @@ def evaluate(model, eval_loader):
     # ax.pcolormesh(align)
     # fig.savefig("data/att.png")
     print("  End of evaluation : loss {:05.3f} , acc {:03.1f}".format(np.mean(losses), np.mean(accs)))
-    return {'loss': np.mean(losses), 'cer': np.mean(accs)*100}
+    
+    avg_loss = np.mean(losses)
+    accuracy = None
+
+    return avg_loss,accuracy
+
+
+ 
