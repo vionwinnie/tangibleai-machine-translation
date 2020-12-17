@@ -124,7 +124,7 @@ class Seq2Seq(nn.Module):
                 decoder_input = targets[:, t].unsqueeze(1)
             else:
                 decoder_input = torch.argmax(predictions,axis=1).unsqueeze(1)
-                final_sentences[:,t] = decoder_input
+                final_sentences[:,t] = decoder_input.squeeze(1)
 
         labels = targets.contiguous().view(-1)
         mask_value = 0
