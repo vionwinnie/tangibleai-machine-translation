@@ -25,7 +25,11 @@ class Decoder(nn.Module):
         #self.V = nn.Linear(self.enc_units, 1)
 
     def forward(self, inputs, hidden):
-
+        """
+        INPUTS:
+        - inputs: BATCHSIZE x 1 (Input Token)
+        - hidden: Last Encoder Input 1x BATCHSIZE x Encoding Units
+        """
         if self.debug:
             print("x: {}".format(inputs.shape))
             print("hidden: {}".format(hidden.shape))
@@ -47,9 +51,9 @@ class Decoder(nn.Module):
         # output shape == (batch_size * 1, vocab)
         output = self.fc(output)
         if self.debug:
-            print("output after reshape: {}".format(output.shape))
+            print("output after fully-connected: {}".format(output.shape))
       
-        output = self.softmax(output[0])
+        output = self.softmax(output)
         if self.debug:
             print("output after fully connected: {}".format(output.shape))
         else:
