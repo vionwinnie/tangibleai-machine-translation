@@ -20,5 +20,5 @@
   "metrics": "BagOfWords",
   "gpu": false,
   "loss": "cross_entropy",
-  "debug": false
+  "debug": true
 }

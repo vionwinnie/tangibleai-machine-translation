@@ -46,8 +46,10 @@ class Decoder(nn.Module):
 
         # output shape == (batch_size * 1, vocab)
         output = self.fc(output)
+        if self.debug:
+            print("output after reshape: {}".format(output.shape))
+      
         output = self.softmax(output[0])
-
         if self.debug:
             print("output after fully connected: {}".format(output.shape))
         else:
