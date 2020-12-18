@@ -53,7 +53,7 @@ class Seq2Seq(nn.Module):
         ## Check to see if batch_size parameter is fixed or base on input batch
         cur_batch_size = x.size()[1]
         encode_init_state = self.encoder.initialize_hidden_state(cur_batch_size)
-        encoder_outputs, encoder_state = self.encoder.forward(x, encode_init_state, x_len)
+        encoder_state, encoder_outputs = self.encoder.forward(x, encode_init_state, x_len)
 
         return encoder_outputs, encoder_state
 
