@@ -59,6 +59,18 @@ class Seq2Seq(nn.Module):
 
     def decode(self, encoder_outputs, encoder_hidden, targets, targets_lengths):
         """
+        In the simplest seq2seq decoder we use only last 
+        output of the encoder. This last output is sometimes 
+        called the context vector as it encodes context 
+        from the entire sequence. This context vector is used 
+        as the initial hidden state of the decoder.
+
+        At every step of decoding, the decoder is given an input 
+        token and hidden state. The initial input token 
+        is the start-of-string <SOS> token, and the first 
+        hidden state is the context vector 
+        (the encoder’s last hidden state).
+
         Args:
             encoder_outputs: (B, T, H)
             encoder_hidden: (B, H)
