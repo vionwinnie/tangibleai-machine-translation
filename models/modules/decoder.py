@@ -55,9 +55,9 @@ class Decoder(nn.Module):
       
         output = self.softmax(output)
         if self.debug:
-            print("output after fully connected: {}".format(output.shape))
-        else:
-            return output, state
+            print("output after softmax: {}".format(output.shape))
+        
+        return output, state
 
     def initialize_hidden_state(self, batch_size):
         return torch.zeros((1, batch_size, self.dec_units))
