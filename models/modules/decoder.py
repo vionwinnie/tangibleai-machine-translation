@@ -16,6 +16,7 @@ class Decoder(nn.Module):
                           self.dec_units,
                           batch_first=True)
         self.fc = nn.Linear(self.dec_units, self.vocab_size)
+        self.softmax = nn.LogSoftmax(dim=1)
         self.attention = False
         self.debug=config.get("debug",False)
         # used for attention
@@ -23,54 +24,18 @@ class Decoder(nn.Module):
         #self.W2 = nn.Linear(self.enc_units, self.dec_units)
         #self.V = nn.Linear(self.enc_units, 1)
 
-    def forward(self, x, hidden, enc_output):
-        # enc_output original: (max_length, batch_size, enc_units)
-        # enc_output converted == (batch_size, max_length, hidden_size)
+    def forward(self, inputs, hidden):
 
         if self.debug:
-            print("x: {}".format(x.shape))
+            print("x: {}".format(inputs.shape))
             print("hidden: {}".format(hidden.shape))
-            print("enc output: {}".format(enc_output.shape))
 
-        enc_output = enc_output.permute(1, 0, 2)
-        # hidden shape == (batch_size, hidden size)
-        # hidden_with_time_axis shape == (batch_size, 1, hidden size)
-        # we are doing this to perform addition to calculate the score
+        output = self.embedding(inputs)
 
         if self.debug:
-            print("enc output after permutation: {}".format(enc_output.shape))
-
-        # hidden shape == (batch_size, hidden size)
-        # hidden_with_time_axis shape == (batch_size, 1, hidden size)
-        if self.attention:
-            hidden_with_time_axis = hidden.permute(1, 0, 2)
-            # score: (batch_size, max_length, hidden_size) # Bahdanaus's
-            # we get 1 at the last axis because we are applying tanh(FC(EO) + FC(H)) to self.V
-            # It doesn't matter which FC we pick for each of the inputs
-            score = torch.tanh(self.W1(enc_output) + self.W2(hidden_with_time_axis))
-            # attention_weights shape == (batch_size, max_length, 1)
-            # we get 1 at the last axis because we are applying score to self.V
-            attention_weights = torch.softmax(self.V(score), dim=1)
-
-            # context_vector shape after sum == (batch_size, hidden_size)
-            context_vector = attention_weights * enc_output
-            context_vector = torch.sum(context_vector, dim=1)
-
-            # x shape after passing through embedding == (batch_size, 1, embedding_dim)
-            # takes case of the right portion of the model above (illustrated in red)
-        x = self.embedding(x)
-
-        if self.debug:
-            print("dimension x after embedding layer: {}".format(x.shape))
-        # x shape after concatenation == (batch_size, 1, embedding_dim + hidden_size)
-        #x = tf.concat([tf.expand_dims(context_vector, 1), x], axis=-1)
-        # ? Looks like attention vector in diagram of source
-        if self.attention:
-            x = torch.cat((context_vector.unsqueeze(1), x), -1)
-
-        # passing the concatenated vector to the GRU
-        # output: (batch_size, 1, hidden_size)
-        output, state = self.gru(x)
+            print("dimension x after embedding layer: {}".format(inputs.shape))
+        
+        output, state = self.gru(output,hidden)
 
         if self.debug:
             print("output dim:{}, state dim: {}".format(output.shape,state.shape))
@@ -80,14 +45,13 @@ class Decoder(nn.Module):
             print("output after reshape: {}".format(output.shape))
 
         # output shape == (batch_size * 1, vocab)
-        x = self.fc(output)
+        output = self.fc(output)
+        output = self.softmax(output[0])
 
         if self.debug:
-            print("x after fully connected: {}".format(x.shape))
-        if self.attention:
-            return x, state, attention_weights
+            print("output after fully connected: {}".format(output.shape))
         else:
-            return x, state
+            return output, state
 
     def initialize_hidden_state(self, batch_size):
         return torch.zeros((1, batch_size, self.dec_units))

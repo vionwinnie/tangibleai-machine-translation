@@ -113,7 +113,6 @@ class Seq2Seq(nn.Module):
             # enc_hidden: 1, batch_size, enc_units
             # output: max_length, batch_size, enc_units
             predictions, decoder_hidden = self.decoder.forward(decoder_input.to(self.device),
-                                         decoder_hidden.to(self.device),
                                          encoder_outputs.to(self.device))
 
             ## Store Prediction at time step t
