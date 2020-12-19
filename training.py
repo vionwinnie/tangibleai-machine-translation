@@ -3,6 +3,7 @@ import numpy as np
 import editdistance
 import matplotlib.pyplot as plt
 import tqdm
+from utils.postprocess import count_bag_of_words, detokenize_sentences
 
 def train(model, optimizer, train_loader, state):
     """
@@ -50,22 +51,34 @@ def evaluate(model, eval_loader,targIdx):
             loss, logits, labels , sentence_pred = model.loss(batch)
             preds = logits.detach().cpu().numpy()
 
-            # acc = np.sum(np.argmax(preds, -1) == labels.detach().cpu().numpy()) / len(preds)
+            cur_batch_size = final_sentences.size()[0]
+            ## Convert sentences from idx to list of list of words
+            decoded_targets = detokenize_sentences(
+                    labels.view(cur_batch_size,-1),
+                    targ_index.idx2word,
+                    output='token')
+
+            decoded_pred = detokenize_sentences(
+                    final_sentences,
+                    targ_index.idx2word,
+                    output='token')
+            
+            ## Calculate bag of word accuracy
+            acc = count_bag_of_words(
+                    decoded_targets,
+                    decoded_pred,
+                    output='mean')
+
             ## This is where I need to work on plugging in Bag of Words/ BLEU Score / in this repo, it uses Levenshtein distance to measure how similar two strings are, but to do that, I need to translate the phrases first, I will use that next
-            acc = 100 * editdistance.eval(np.argmax(preds, -1), labels.detach().cpu().numpy()) / len(preds)
             losses.append(loss.item())
             accs.append(acc)
             t.set_postfix(avg_acc='{:05.3f}'.format(np.mean(accs)), avg_loss='{}'.format(np.mean(losses)))
             t.update()
 
-    # Uncomment if you want to visualise weights
-    # fig, ax = plt.subplots(1, 1)
-    # ax.pcolormesh(align)
-    # fig.savefig("data/att.png")
     print("  End of evaluation : loss {:05.3f} , acc {:03.1f}".format(np.mean(losses), np.mean(accs)))
     
     avg_loss = np.mean(losses)
-    accuracy = None
+    avg_acc = np.mean(accs)
 
     return avg_loss,accuracy
 
