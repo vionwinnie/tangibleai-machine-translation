@@ -18,7 +18,8 @@ def detokenize_sentences(token_array,token_dictionary,output='sentence'):
 
     return reshaped_sentences
 
-def count_bag_of_words(target_token_list,pred_token_list,output='sum'):
+def count_bag_of_words(target_token_list,pred_token_list,
+        output='sum',debug=False):
     
     """
     Input:
@@ -38,9 +39,10 @@ def count_bag_of_words(target_token_list,pred_token_list,output='sum'):
         target_token_list = list(set(target_sent))
         pred_token_list = list(set(pred_sent))
 
-        print("===============================")
-        print("Target: {}".format(target_token_list))
-        print("Pred : {}".format(pred_token_list))
+        if debug:
+            print("===============================")
+            print("Target: {}".format(target_token_list))
+            print("Pred : {}".format(pred_token_list))
 
         assert len(target_token_list) > 0
 
@@ -64,7 +66,7 @@ def convert_token_array_to_corpus(target,label,batch_size,idx2word_dict):
     if target:
         decoded_targets = detokenize_sentences(label.view(batch_size,-1),idx2word_dict)
     if label:
-        decoded_labels = detokenize_sentences(target,idx2word_dict):
+        decoded_labels = detokenize_sentences(target,idx2word_dict)
     
     return decoded_labels, decoded_targets
 

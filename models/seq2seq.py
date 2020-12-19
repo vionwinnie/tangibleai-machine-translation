@@ -90,7 +90,7 @@ class Seq2Seq(nn.Module):
         batch_size = encoder_outputs.size()[1]
         max_length = targets.size()[1]
         decoder_input = torch.tensor([[self.SOS]]* batch_size)
-        decoder_hidden = encoder_hidden
+        decoder_hidden = encoder_outputs
 
         if self.debug:
             print("decoder_input dim: {}".format(decoder_input.shape))
@@ -125,7 +125,7 @@ class Seq2Seq(nn.Module):
             # enc_hidden: 1, batch_size, enc_units
             # output: max_length, batch_size, enc_units
             predictions, decoder_hidden = self.decoder.forward(decoder_input.to(self.device),
-                                         encoder_outputs.to(self.device))
+                                         decoder_hidden.to(self.device))
 
             ## Store Prediction at time step t
             logits[t] = predictions

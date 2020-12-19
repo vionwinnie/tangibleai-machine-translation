@@ -85,11 +85,20 @@ def run():
         run_state = (epoch, FLAGS.epochs)
 
         # Train needs to return model and optimizer, otherwise the model keeps restarting from zero at every epoch
-        model, optimizer,train_avg_loss = train(model, optimizer, train_dataset, run_state)
+        model, optimizer,train_avg_loss = train(
+                model, 
+                optimizer, 
+                train_dataset, 
+                run_state,
+                config['debug'])
         all_train_avg_loss.append(train_avg_loss)
 
         # Return Val Set Loss and Accuracy
-        eval_avg_loss, eval_acc = evaluate(model, eval_dataset,targ_index)
+        eval_avg_loss, eval_acc = evaluate(
+                model, 
+                eval_dataset,
+                targ_index,
+                config['debug'])
         all_eval_avg_loss.append(eval_avg_loss)
         all_eval_avg_acc.append(eval_acc)
 
