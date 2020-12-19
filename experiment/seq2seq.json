@@ -17,7 +17,7 @@
   "attention_score": "general",
   "attention_mlp_pre": false,
   "learning_rate": 0.001,
-  "metrics": "BagOfWords",
+  "metrics": "BoW",
   "gpu": false,
   "loss": "cross_entropy",
   "debug": false

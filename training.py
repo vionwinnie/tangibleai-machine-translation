@@ -4,6 +4,7 @@ import editdistance
 import matplotlib.pyplot as plt
 import tqdm
 from utils.postprocess import count_bag_of_words, detokenize_sentences
+from nltk.translate.bleu_score import corpus_bleu
 
 def train(model, optimizer, train_loader, state,debug=False):
     """
@@ -37,7 +38,7 @@ def train(model, optimizer, train_loader, state,debug=False):
 
     return model, optimizer,avg_loss
 
-def evaluate(model, eval_loader,targ_index,debug=False):
+def evaluate(model, eval_loader,targ_index,scorer,debug=False):
 
     losses = []
     accs = []
@@ -64,13 +65,16 @@ def evaluate(model, eval_loader,targ_index,debug=False):
                     output='token')
             
             ## Calculate bag of word accuracy
-            acc = count_bag_of_words(
-                    decoded_targets,
-                    decoded_pred,
-                    output='mean',
-                    debug=debug)
+            #acc = count_bag_of_words(
+            #       decoded_targets,
+            #        decoded_pred,
+            #        output='mean',
+            #        debug=debug)
+            acc = scorer(decoded_targets,decoded_pred,output='mean',debug=debug)
+            
+            # If it is for corpus_bleu
+            #acc = scorer(decoded_targets,decoded_pred,weights=(1,0,0,0))
 
-            ## This is where I need to work on plugging in Bag of Words/ BLEU Score / in this repo, it uses Levenshtein distance to measure how similar two strings are, but to do that, I need to translate the phrases first, I will use that next
             losses.append(loss.item())
             accs.append(acc)
             t.set_postfix(avg_acc='{:05.3f}'.format(np.mean(accs)), avg_loss='{}'.format(np.mean(losses)))

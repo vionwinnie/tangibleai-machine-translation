@@ -6,7 +6,6 @@ from pathlib import Path
 import pandas as pd
 from datetime import datetime
 
-
 from training import train, evaluate
 from models.seq2seq import Seq2Seq
 from torch.utils import data
@@ -14,6 +13,7 @@ from torch.utils import data
 import utils.load_raw_data as dl
 from utils.data_generator import MyData, LanguageIndex
 import utils.preprocess as dp
+from utils.postprocess import create_scorer
 
 from sklearn.model_selection import train_test_split
 
@@ -62,6 +62,7 @@ def run():
                      shuffle=True)
     # Models
     model = Seq2Seq(config,vocab_inp_size,vocab_tar_size)
+    scorer = create_scorer(config['metrics'])
 
     if config['gpu']:
         model = model.cuda()
@@ -98,6 +99,7 @@ def run():
                 model, 
                 eval_dataset,
                 targ_index,
+                scorer,
                 config['debug'])
         all_eval_avg_loss.append(eval_avg_loss)
         all_eval_avg_acc.append(eval_acc)

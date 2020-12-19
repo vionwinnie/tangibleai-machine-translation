@@ -57,25 +57,11 @@ def count_bag_of_words(target_token_list,pred_token_list,
         ## Average accuracy
         return accum_accuracy/length_list
         
+def create_scorer(method='BoW'):
 
-def convert_token_array_to_corpus(target,label,batch_size,idx2word_dict):
-
-    decoded_targets = None
-    decoded_labels = None
-
-    if target:
-        decoded_targets = detokenize_sentences(label.view(batch_size,-1),idx2word_dict)
-    if label:
-        decoded_labels = detokenize_sentences(target,idx2word_dict)
-    
-    return decoded_labels, decoded_targets
-
-
-def bag_of_word_accuracy(actual_corpus,pred_corpus):
-    
-    assert len(actual_corpus) == len(pred_corpus)
-    sum_accuracy = 0
-    for actual_sentence,pred_sentence in zip(actual_corpus,pred_corpus):
-        cur_accuracy = count_bag_of_words(actual_token_list,pred_token_list)
-        sum_accuracy += cur_accuracy
-    return sum_accuracy, sum_accuracy/len(actural_corpus)
+    if method == 'BoW':
+        return count_bag_of_words
+    elif method == 'BLEU':
+        return corpus_bleu
+    else:
+        raise ValueError("Please specify evaluating methods in config")
