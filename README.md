@@ -15,6 +15,10 @@ Modularized code for Tangible AI Machine Translation Project
 - Model Checkpoint Path: Directory to save model checkpoint
 - Metric Directory: Directory to save learning curve and model metrics
 
+## Dependencies:
+- Python 3.7.8
+- Pytorch 1.6
+
 ## Packages:
 - NLTK
 - editdistance
